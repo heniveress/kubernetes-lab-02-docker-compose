@@ -1,0 +1,14 @@
+services:
+  coffee-log:
+    build: .
+    image: heniveress/coffee-log:alpine
+    container_name: coffee-log
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/health"]
+      interval: 30s
+      timeout: 3s
+      start_period: 20s
+      retries: 5
