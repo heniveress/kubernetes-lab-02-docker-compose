@@ -6,3 +6,5 @@ target/
 .vscode/
 Dockerfile
 docker-compose.yml
+src/main/resources/env.properties
+.env

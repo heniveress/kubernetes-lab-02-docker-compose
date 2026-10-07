@@ -2,10 +2,12 @@ package com.example.coffee_log.service;
 
 import com.example.coffee_log.model.Brew;
 import com.example.coffee_log.repository.BrewRepository;
+import com.example.coffee_log.repository.BrewRepository.CapsuleCount;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -29,27 +31,23 @@ public class BrewService {
     }
 
     public Map<String, Object> getStats() {
-        List<Brew> brews = repository.findAll();
+        List<CapsuleCount> counts = repository.countByCapsule();
 
-        Map<String, Long> countByCapsule = brews.stream()
-                .collect(Collectors.groupingBy(Brew::capsuleName, Collectors.counting()));
+        Map<String, Long> brewsByCapsule = new LinkedHashMap<>();
+        counts.forEach(c -> brewsByCapsule.put(c.getCapsuleName(), c.getTotal()));
 
-        String mostUsedCapsule = countByCapsule.entrySet().stream()
-                .max(Comparator.comparingLong(Map.Entry::getValue))
-                .map(Map.Entry::getKey)
+        String mostUsedCapsule = counts.stream()
+                .max(Comparator.comparingLong(CapsuleCount::getTotal))
+                .map(CapsuleCount::getCapsuleName)
                 .orElse(null);
 
-        double averageIntensity = brews.stream()
-                .filter(brew -> brew.intensity() != null)
-                .mapToInt(Brew::intensity)
-                .average()
-                .orElse(0.0);
+        Double average = repository.averageIntensity();
 
-        return Map.of(
-                "totalBrews", brews.size(),
-                "mostUsedCapsule", mostUsedCapsule,
-                "averageIntensity", averageIntensity,
-                "brewsByCapsule", countByCapsule
-        );
+        Map<String, Object> stats = new LinkedHashMap<>();
+        stats.put("totalBrews", repository.count());
+        stats.put("mostUsedCapsule", mostUsedCapsule);
+        stats.put("averageIntensity", average == null ? 0.0 : average);
+        stats.put("brewsByCapsule", brewsByCapsule);
+        return stats;
     }
 }

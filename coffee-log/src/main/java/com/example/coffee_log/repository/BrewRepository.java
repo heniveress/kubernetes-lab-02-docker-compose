@@ -1,25 +1,23 @@
 package com.example.coffee_log.repository;
 
 import com.example.coffee_log.model.Brew;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.List;
 
-@Repository
-public class BrewRepository {
+public interface BrewRepository extends JpaRepository<Brew, Long> {
 
-    private final List<Brew> brews = new ArrayList<>();
-    private final AtomicLong idCounter = new AtomicLong(1);
+    List<Brew> findAllByOrderByIdAsc();
 
-    public Brew save(Brew brew) {
-        Brew saved = new Brew(idCounter.getAndIncrement(), brew.capsuleName(), brew.size(), brew.intensity(), brew.timestamp());
-        brews.add(saved);
-        return saved;
-    }
+    @Query("select b.capsuleName as capsuleName, count(b) as total from Brew b group by b.capsuleName")
+    List<CapsuleCount> countByCapsule();
 
-    public List<Brew> findAll() {
-        return List.copyOf(brews);
+    @Query("select avg(b.intensity) from Brew b")
+    Double averageIntensity();
+
+    interface CapsuleCount {
+        String getCapsuleName();
+        Long getTotal();
     }
 }
