@@ -16,3 +16,7 @@ Try to deploy the application in the live environment!
 If possible, set up Caddy as your web server.
 
 Fork this repository and continue your work here.
+
+---
+
+**NOTE:** Could not deploy to a live environment because of the limit I did not get access to a server (Hetzner) in class. Everything else was done and tested locally.
